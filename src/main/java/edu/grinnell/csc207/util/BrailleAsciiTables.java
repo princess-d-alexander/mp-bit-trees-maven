@@ -1,13 +1,13 @@
 package edu.grinnell.csc207.util;
 
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  *
  *
- * @author Your Name Here
+ * @author Princess Alexander
  * @author Samuel A. Rebelsky
  */
 public class BrailleAsciiTables {
