@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- *
+ * Utility class for converting between Braille, ASCII, and Unicode.
  *
  * @author Princess Alexander
  * @author Samuel A. Rebelsky
@@ -14,11 +14,12 @@ public class BrailleAsciiTables {
   // +-----------+---------------------------------------------------
   // | Constants |
   // +-----------+
-
   /**
-   * Conversions from ASCII to braille.
+   * Conversion table for ASCII to Braille.
+   * Each line maps an ASCII character to its Braille bit string.
    */
-  static final String a2b = 
+  // Conversion tables
+  static final String a2b =
       "01000001,100000\n"
       + "01000010,110000\n"
       + "01000011,100100\n"
@@ -72,9 +73,9 @@ public class BrailleAsciiTables {
       + "01111001,101111\n"
       + "01111010,101011\n"
       + "00100000,000000\n";
-
   /**
-   * Conversions from braille to ASCII.
+   * Conversion table for Braille to Asciicode.
+   * Each line maps a Braille bit string to a Asciicode character.
    */
   static final String b2a =
       "100000,A\n"
@@ -104,9 +105,9 @@ public class BrailleAsciiTables {
       + "101011,Z\n"
       + "010111,W\n"
       + "000000, \n";
-
   /**
-   * Conversions from braille to unicode.
+   * Conversion table for Braille to Unicode.
+   * Each line maps a Braille bit string to a Unicode character.
    */
   static final String b2u =
       "000000,2800\n"
@@ -140,56 +141,19 @@ public class BrailleAsciiTables {
       + "001110,281C\n"
       + "101110,281D\n"
       + "011110,281E\n"
-      + "111110,281F\n"
-      + "000001,2820\n"
-      + "100001,2821\n"
-      + "010001,2822\n"
-      + "110001,2823\n"
-      + "001001,2824\n"
-      + "101001,2825\n"
-      + "011001,2826\n"
-      + "111001,2827\n"
-      + "000101,2828\n"
-      + "100101,2829\n"
-      + "010101,282A\n"
-      + "110101,282B\n"
-      + "001101,282C\n"
-      + "101101,282D\n"
-      + "011101,282E\n"
-      + "111101,282F\n"
-      + "000011,2830\n"
-      + "100011,2831\n"
-      + "010011,2832\n"
-      + "110011,2833\n"
-      + "001011,2834\n"
-      + "101011,2835\n"
-      + "011011,2836\n"
-      + "111011,2837\n"
-      + "000111,2838\n"
-      + "100111,2839\n"
-      + "010111,283A\n"
-      + "110111,283B\n"
-      + "001111,283C\n"
-      + "101111,283D\n"
-      + "011111,283E\n"
-      + "111111,283F\n";
+      + "111110,281F\n";
 
   // +---------------+-----------------------------------------------
   // | Static fields |
   // +---------------+
 
   /**
-   *
-   */
-  static BitTree a2bTree = null;
-
-  /**
-   *
+   * Tree for braille-to-ASCII conversion.
    */
   static BitTree b2aTree = null;
 
   /**
-   *
+   * Tree for braille-to-Unicode conversion.
    */
   static BitTree b2uTree = null;
 
@@ -202,34 +166,71 @@ public class BrailleAsciiTables {
   // +----------------+
 
   /**
+   * Converts an ASCII letter to its Braille representation.
    *
+   * @param letter the ASCII letter to convert
+   * @return the Braille representation of the letter
    */
   public static String toBraille(char letter) {
-    return "";  // STUB
-  } // toBraille(char)
+    // Find the Braille representation in the a2b table
+    String letterBits = getFromA2BTable(letter);
+    return letterBits != null ? letterBits : "";  // Return empty string if not found
+  } // String toBraille
 
   /**
+   * Converts a string of Braille bits into the corresponding ASCII characters.
    *
+   * @param bits a string of Braille bits
+   * @return the ASCII representation of the bits
    */
   public static String toAscii(String bits) {
-    // Make sure we've loaded the braille-to-ASCII tree.
-    if (null == b2aTree) {
+    // Ensure the Braille-to-ASCII tree is loaded
+    if (b2aTree == null) {
       b2aTree = new BitTree(6);
       InputStream b2aStream = new ByteArrayInputStream(b2a.getBytes());
       b2aTree.load(b2aStream);
       try {
         b2aStream.close();
       } catch (IOException e) {
-        // We don't care if we can't close the stream.
-      } // try/catch
+      } // catch (Ignore)
     } // if
-    return "";  // STUB
-  } // toAscii(String)
+    return b2aTree.get(bits);  // Look up the ASCII representation
+  } // String toAscii
 
   /**
+   * Converts a string of Braille bits into the corresponding Unicode characters.
    *
+   * @param bits a string of Braille bits
+   * @return the Unicode representation of the bits
    */
   public static String toUnicode(String bits) {
-    return "";  // STUB
-  } // toUnicode(String)
+    // Ensure the Braille-to-Unicode tree is loaded
+    if (b2uTree == null) {
+      b2uTree = new BitTree(6);
+      InputStream b2uStream = new ByteArrayInputStream(b2u.getBytes());
+      b2uTree.load(b2uStream);
+      try {
+        b2uStream.close();
+      } catch (IOException e) {
+      } // catch (ignore)
+    } // if
+    return b2uTree.get(bits);  // Look up the Unicode representation
+  } // String to Unicode
+
+  /**
+   * Helper method to get the Braille bit string from the a2b table for a given letter.
+   *
+   * @param letter the ASCII character
+   * @return the Braille bit string for the letter, or null if not found
+   */
+  private static String getFromA2BTable(char letter) {
+    String[] mappings = a2b.split("\n");
+    for (String mapping : mappings) {
+      String[] pair = mapping.split(",");
+      if (pair[1].charAt(0) == letter) {
+        return pair[0];
+      } // if
+    } // for
+    return null;
+  } //String getFromA2BTable
 } // BrailleAsciiTables
