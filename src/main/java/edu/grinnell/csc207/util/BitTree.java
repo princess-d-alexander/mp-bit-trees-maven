@@ -106,7 +106,7 @@ public class BitTree {
       throw new IndexOutOfBoundsException("Bit sequence does not correspond to a value");
     } // if
     return current.value;
-  } // End of get method
+  } // End of get method]
 
   /**
    * Dumps the contents of the tree in CSV format.
